@@ -4,62 +4,41 @@ import Vector3 from "./webgl/Vector3.js";
 import Color from "./webgl/Color.js";
 
 let scene;
-let motion = new Vector3(0, 0, 0);
+let motion = new Vector3(0.0, 0.0, 0.0);
 let speed = 0.006;
 
-let objekKiri = () => [
-  1.0,
-  0.0,
-  0.0,
-  0.0, //
-  0.0,
-  1.0,
-  0.0,
-  0.0, //
-  0.0,
-  0.0,
-  1.0,
-  0.0, //
-  0.0,
-  0.0,
-  0.0,
-  1.0, //
-];
-
-let objekKanan = () => [
-  1.0,
-  0.0,
-  0.0,
-  0.0, //
-  0.0,
-  1.0,
-  0.0,
-  0.0, //
-  0.0,
-  0.0,
-  1.0,
-  0.0, //
-  0.0,
-  motion.y,
-  0.0,
-  1.0, //
-];
-
 const createGallon = (id, x, y, objMotion) => {
-  const topGallons = [];
-  for (let i = 0; i < 20; i++) {
+  let topGallons = [];
+  const numLoop = 10;
+  for (let i = 0; i < numLoop; i++) {
     topGallons.push({
       _id: id,
       centerX: x,
-      centerY: y + 0.3 - (i * (0.3 - 0.1)) / 20,
+      centerY: y + 0.32 - (i * (0.3 - 0.1)) / numLoop,
       centerZ: 0,
       radiusX: 6 + Math.pow(i * 0.15, 2),
-      radiusY: 4 + (i * (12 - 4)) / 20,
-      numberOfSides: 120,
-      uniformColors: new Color(0.5, 0.5, 0.8 + (i * (0.84 - 0.8)) / 20, 1.0),
+      radiusY: 4 + (i * (12 - 4)) / numLoop,
+      numberOfSides: 30,
+      uniformColors: new Color(
+        153 / 255,
+        220 / 255,
+        249 + (i * (255 - 249)) / (255 * numLoop),
+        1.0
+      ),
       motion: objMotion,
     });
   }
+  topGallons.push({
+    _id: id,
+    centerX: x,
+    centerY: y + 0.32,
+    centerZ: 0,
+    radiusX: 4,
+    radiusY: 2,
+    numberOfSides: 30,
+    uniformColors: new Color(249 / 255, 249 / 255, 237 / 255, 1.0),
+    motion: objMotion,
+  });
 
   const bottomGallons = [
     {
@@ -69,8 +48,8 @@ const createGallon = (id, x, y, objMotion) => {
       centerZ: 0,
       radiusX: 22,
       radiusY: 12,
-      numberOfSides: 120,
-      uniformColors: new Color(0.5, 0.5, 1.0, 1.0),
+      numberOfSides: 30,
+      uniformColors: new Color(153 / 255, 220 / 255, 249 / 255, 1.0),
       motion: objMotion,
     },
     {
@@ -80,8 +59,8 @@ const createGallon = (id, x, y, objMotion) => {
       centerZ: 0,
       radiusX: 22,
       radiusY: 12,
-      numberOfSides: 120,
-      uniformColors: new Color(0.5, 0.5, 0.96, 1.0),
+      numberOfSides: 30,
+      uniformColors: new Color(173 / 255, 234 / 255, 255 / 225, 1.0),
       motion: objMotion,
     },
     {
@@ -91,8 +70,8 @@ const createGallon = (id, x, y, objMotion) => {
       centerZ: 0,
       radiusX: 22,
       radiusY: 12,
-      numberOfSides: 120,
-      uniformColors: new Color(0.5, 0.5, 0.92, 1.0),
+      numberOfSides: 30,
+      uniformColors: new Color(153 / 255, 220 / 255, 249 / 255, 1.0),
       motion: objMotion,
     },
     {
@@ -102,8 +81,8 @@ const createGallon = (id, x, y, objMotion) => {
       centerZ: 0,
       radiusX: 22,
       radiusY: 12,
-      numberOfSides: 120,
-      uniformColors: new Color(0.5, 0.5, 0.88, 1.0),
+      numberOfSides: 30,
+      uniformColors: new Color(173 / 255, 234 / 255, 255 / 225, 1.0),
       motion: objMotion,
     },
     {
@@ -113,8 +92,8 @@ const createGallon = (id, x, y, objMotion) => {
       centerZ: 0,
       radiusX: 22,
       radiusY: 12,
-      numberOfSides: 120,
-      uniformColors: new Color(0.5, 0.5, 0.84, 1.0),
+      numberOfSides: 30,
+      uniformColors: new Color(153 / 255, 220 / 255, 249 / 255, 1.0),
       motion: objMotion,
     },
   ];
@@ -129,8 +108,8 @@ function main() {
   const bgColor = new Color(249 / 255, 249 / 255, 237 / 255, 1.0);
   scene.setBgColor(bgColor);
 
-  const gallon1 = createGallon(1, -0.5, 0, objekKiri());
-  const gallon2 = createGallon(2, 0.5, 0, objekKanan());
+  const gallon1 = createGallon(1, -0.5, 0, new Vector3(0.0, 0.0, 0.0));
+  const gallon2 = createGallon(2, 0.5, 0, new Vector3(0.0, motion.y, 0.0));
 
   const gallons = [...gallon1, ...gallon2];
 
@@ -160,7 +139,7 @@ function update() {
 
   scene.getGeometries().forEach((geometry) => {
     if (geometry.getId() === 2) {
-      geometry.motionMatrix = objekKanan();
+      geometry.motion = new Vector3(0.0, motion.y, 0.0);
     }
   });
 

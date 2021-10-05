@@ -7,11 +7,11 @@ export default class Circle extends Geometry {
     id,
     position,
     uniformColors = new Color(1.0, 0.5, 0.5, 1.0),
-    motionMatrix = [],
+    motion,
     radius = 10,
     numberOfSides = 60
   ) {
-    super(id, position, uniformColors, motionMatrix);
+    super(id, position, uniformColors, motion);
     this._radius = radius;
     this._numberOfSides = numberOfSides;
     this._numberOfVertices = numberOfSides + 2;

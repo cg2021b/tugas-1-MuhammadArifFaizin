@@ -4,32 +4,27 @@ import Vector3 from "./Vector3.js";
 export default class Geometry {
   _id;
   _vertices = []; // Vector3
-  _faces = []; // Face
   _colors = []; // Color
   _drawMode = 0x0004; // TRIANGLES
   _uniform_colors;
-  motionMatrix = [];
+  motion;
 
   //position :Vector3
   constructor(
     id,
     position = new Vector3(0, 0, 0),
     uniformColors = new Color(1.0, 0.5, 0.5, 1.0),
-    motionMatrix = []
+    motion = new Vector3(0.0, 0.0, 0.0)
   ) {
     this._id = id;
     this._position = position;
     this._uniform_colors = uniformColors;
-    this.motionMatrix = motionMatrix;
+    this.motion = motion;
   }
 
   //Vector3
   addVertice = (vertice) => {
     this._vertices.push(vertice);
-  };
-
-  addFace = (face) => {
-    this._faces.push(face);
   };
 
   addColor = (color) => {

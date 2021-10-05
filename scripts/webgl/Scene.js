@@ -156,7 +156,25 @@ export default class Scene {
         this.shaderProgram,
         "u_matrix"
       );
-      this.context.uniformMatrix4fv(u_matrix, false, geometry.motionMatrix);
+      const motionMatrix = [
+        1.0,
+        0.0,
+        0.0,
+        0.0, //
+        0.0,
+        1.0,
+        0.0,
+        0.0, //
+        0.0,
+        0.0,
+        1.0,
+        0.0, //
+        geometry.motion.x,
+        geometry.motion.y,
+        geometry.motion.z,
+        1.0, //
+      ];
+      this.context.uniformMatrix4fv(u_matrix, false, motionMatrix);
 
       this.context.drawArrays(
         geometry._drawMode,
