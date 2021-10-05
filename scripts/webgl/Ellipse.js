@@ -2,21 +2,22 @@ import Color from "./Color.js";
 import Vector3 from "./Vector3.js";
 import Geometry from "./Geometry.js";
 
-export default class Circle extends Geometry {
+export default class Ellipse extends Geometry {
   constructor(
+    id,
     position,
+    uniformColors = new Color(1.0, 0.5, 0.5, 1.0),
+    motionMatrix = [],
     radiusX = 10,
     radiusY = 6,
-    numberOfSides = 60,
-    uniformColors = new Color(1.0, 0.5, 0.5, 1.0)
+    numberOfSides = 60
   ) {
-    super(position);
+    super(id, position, uniformColors, motionMatrix);
     this._radiusX = radiusX;
     this._radiusY = radiusY;
     this._numberOfSides = numberOfSides;
     this._numberOfVertices = numberOfSides + 2;
     this._drawMode = 0x0006; // TRIANGLE_FAN
-    this._uniform_colors = uniformColors;
     this.init();
   }
 

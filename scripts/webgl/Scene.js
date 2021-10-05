@@ -1,6 +1,8 @@
 import Color from "./Color.js";
+import Vector3 from "./Vector3.js";
+
 export default class Scene {
-  _bgColor = new Color(1.0, 1.0, 1.0, 1.0);
+  _bgColor;
   geometries = [];
 
   constructor(domElement) {
@@ -12,27 +14,58 @@ export default class Scene {
       );
       return;
     }
+
+    this._bgColor = new Color(1.0, 1.0, 1.0, 1.0);
     this._createShaderProgram();
   }
 
+  _checkIsCompiled = (shader) => {
+    const compiled = this.context.getShaderParameter(
+      shader,
+      this.context.COMPILE_STATUS
+    );
+    if (!compiled) {
+      console.error(this.context.getShaderInfoLog(shader));
+    }
+  };
+
+  _checkIsLinked = () => {
+    const linked = this.context.getProgramParameter(
+      this.shaderProgram,
+      this.context.LINK_STATUS
+    );
+    if (!linked) {
+      console.error(this.context.getProgramInfoLog(this.shaderProgram));
+    }
+  };
+
   _createShaderProgram = () => {
     this.shaderProgram = this.context.createProgram();
-    this.context.attachShader(this.shaderProgram, this._createVertexShader());
-    this.context.attachShader(this.shaderProgram, this._createFragmentShader());
+
+    const vertexShader = this._createVertexShader();
+    this.context.attachShader(this.shaderProgram, vertexShader);
+    this._checkIsCompiled(vertexShader);
+
+    const fragmentShader = this._createFragmentShader();
+    this.context.attachShader(this.shaderProgram, fragmentShader);
+    this._checkIsCompiled(fragmentShader);
+
     this.context.linkProgram(this.shaderProgram);
+    this._checkIsLinked();
     this.context.useProgram(this.shaderProgram);
   };
 
   _createVertexShader = () => {
     let vertexShaderCode = `
-            attribute vec3 aCoordinates;
-            attribute vec4 aColor;
-            varying mediump vec4 vColor;
-            void main(){
-                gl_Position = vec4(aCoordinates, 1.0);
-                gl_PointSize = 10.0;
-                vColor = aColor;
-            }`;
+      attribute vec3 aCoordinates;
+      attribute vec4 aColor;
+      varying mediump vec4 vColor;
+      uniform mat4 u_matrix;
+      void main(){
+          gl_Position = u_matrix * vec4(aCoordinates, 1.0);
+          gl_PointSize = 10.0;
+          vColor = aColor;
+      }`;
 
     let vertexShader = this.context.createShader(this.context.VERTEX_SHADER);
     this.context.shaderSource(vertexShader, vertexShaderCode);
@@ -93,7 +126,14 @@ export default class Scene {
 
   setBgColor = (bgColor) => {
     this._bgColor = bgColor;
-    console.log(bgColor);
+  };
+
+  getGeometries = () => {
+    return this.geometries;
+  };
+
+  setGeometries = (geometries) => {
+    this.geometries = geometries;
   };
 
   render = () => {
@@ -111,6 +151,12 @@ export default class Scene {
 
       this._bindArrayInsideShader(verticeArr, "aCoordinates", 3);
       this._bindArrayInsideShader(colorArr, "aColor", 4);
+
+      const u_matrix = this.context.getUniformLocation(
+        this.shaderProgram,
+        "u_matrix"
+      );
+      this.context.uniformMatrix4fv(u_matrix, false, geometry.motionMatrix);
 
       this.context.drawArrays(
         geometry._drawMode,
