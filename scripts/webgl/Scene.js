@@ -13,15 +13,15 @@ export default class Scene {
     this._createShaderProgram();
   }
 
-  _createShaderProgram() {
+  _createShaderProgram = () => {
     this.shaderProgram = this.context.createProgram();
     this.context.attachShader(this.shaderProgram, this._createVertexShader());
     this.context.attachShader(this.shaderProgram, this._createFragmentShader());
     this.context.linkProgram(this.shaderProgram);
     this.context.useProgram(this.shaderProgram);
-  }
+  };
 
-  _createVertexShader() {
+  _createVertexShader = () => {
     let vertexShaderCode = `
             attribute vec3 aCoordinates;
             varying mediump vec4 vColor;
@@ -36,9 +36,9 @@ export default class Scene {
     this.context.compileShader(vertexShader);
 
     return vertexShader;
-  }
+  };
 
-  _createFragmentShader() {
+  _createFragmentShader = () => {
     let fragmentShaderCode = `
             varying mediump vec4 vColor;
             void main(){
@@ -52,9 +52,9 @@ export default class Scene {
     this.context.compileShader(fragmentShader);
 
     return fragmentShader;
-  }
+  };
 
-  _bindArrayInsideShader(arrayToBePushed, shaderAttribute) {
+  _bindArrayInsideShader = (arrayToBePushed, shaderAttribute) => {
     let buffer = this.context.createBuffer();
     this.context.bindBuffer(this.context.ARRAY_BUFFER, buffer);
     this.context.bufferData(
@@ -76,32 +76,41 @@ export default class Scene {
       0
     );
     this.context.enableVertexAttribArray(coordinate);
-  }
+  };
 
-  add(geometry) {
+  _bindShaderWithNull = () => {
+    this.context.bindBuffer(this.context.ARRAY_BUFFER, null);
+  };
+
+  add = (geometry) => {
     this.geometries.push(geometry);
-  }
+  };
 
-  remove(removedGeometry) {
+  remove = (removedGeometry) => {
     this.geometries.forEach((geometry, index, object) => {
       if (removedGeometry === geometry) object.splice(index, 1);
     });
-  }
+  };
 
-  render() {
-    let vertices = [];
-
-    this.geometries.forEach((geometry) => {
-      vertices.push(...geometry.getVerticeArray());
-    });
-
-    vertices = new Float32Array([...vertices]);
-
-    this._bindArrayInsideShader(vertices, "aCoordinates");
-
+  render = () => {
     this.context.clearColor(1.0, 1.0, 1.0, 1.0);
     this.context.clear(this.context.COLOR_BUFFER_BIT);
 
-    this.context.drawArrays(this.context.TRIANGLES, 0, vertices.length / 3);
-  }
+    this.geometries.forEach((geometry) => {
+      let vertices = [];
+
+      console.log(geometry.getVerticeArray());
+      vertices.push(...geometry.getVerticeArray());
+
+      vertices = new Float32Array([...vertices]);
+
+      this._bindArrayInsideShader(vertices, "aCoordinates");
+
+      this.context.drawArrays(
+        this.context.TRIANGLE_FAN,
+        0,
+        vertices.length / 3
+      );
+    });
+  };
 }

@@ -6,7 +6,8 @@ export default class Color {
     this.a = alpha;
   }
 
-  getArray() {
+  getArray = () => {
     return [this.r, this.g, this.b, this.a];
-  }
+  };
 }
+  

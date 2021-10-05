@@ -2,7 +2,7 @@ import Vector3 from "./Vector3.js";
 
 export default class Geometry {
   _vertices = []; // Vector3
-  _faces = [];
+  _faces = []; // Face
   _colors = [];
 
   //position :Vector3
@@ -11,29 +11,29 @@ export default class Geometry {
   }
 
   //Vector3
-  addVertice(vertice) {
+  addVertice = (vertice) => {
     this._vertices.push(vertice);
-  }
+  };
 
-  addFace(face) {
+  addFace = (face) => {
     this._faces.push(face);
-  }
+  };
 
-  addColor(color) {
+  addColor = (color) => {
     this._colors.push(color);
-  }
+  };
 
-  getVerticeArray() {
+  getVerticeArray = () => {
     let vertices = [];
 
     this._faces.forEach((faces) => {
-      faces
-        .getArray()
-        .forEach((index) => vertices.push(...this._vertices[index].getArray()));
+      faces.getArray().forEach((index) => {
+        vertices.push(...this._vertices[index].getArray());
+      });
     });
 
     return vertices;
-  }
+  };
 
-  getColorArray() {}
+  getColorArray = () => {};
 }
