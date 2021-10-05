@@ -1,13 +1,15 @@
+import Color from "./Color.js";
 import Vector3 from "./Vector3.js";
 
 export default class Geometry {
   _vertices = []; // Vector3
   _faces = []; // Face
-  _colors = [];
+  _colors = []; // Color
+  _drawMode = 0x0004; // TRIANGLES
 
   //position :Vector3
   constructor(position = new Vector3(0, 0, 0)) {
-    this.position = position;
+    this._position = position;
   }
 
   //Vector3
@@ -25,15 +27,21 @@ export default class Geometry {
 
   getVerticeArray = () => {
     let vertices = [];
-
-    this._faces.forEach((faces) => {
-      faces.getArray().forEach((index) => {
-        vertices.push(...this._vertices[index].getArray());
+    this._vertices.forEach((vertice) => {
+      vertice.getArray().forEach((verticeItem) => {
+        vertices.push(verticeItem);
       });
     });
-
     return vertices;
   };
 
-  getColorArray = () => {};
+  getColorArray = () => {
+    let colors = [];
+    this._colors.forEach((color) => {
+      color.getArray().forEach((colorItem) => {
+        colors.push(colorItem);
+      });
+    });
+    return colors;
+  };
 }

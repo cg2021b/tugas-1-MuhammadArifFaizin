@@ -1,4 +1,6 @@
+import Color from "./Color.js";
 export default class Scene {
+  _bgColor = new Color(1.0, 1.0, 1.0, 1.0);
   geometries = [];
 
   constructor(domElement) {
@@ -24,11 +26,12 @@ export default class Scene {
   _createVertexShader = () => {
     let vertexShaderCode = `
             attribute vec3 aCoordinates;
+            attribute vec4 aColor;
             varying mediump vec4 vColor;
             void main(){
                 gl_Position = vec4(aCoordinates, 1.0);
                 gl_PointSize = 10.0;
-                vColor = vec4(1 , .5 , .5 , 1);
+                vColor = aColor;
             }`;
 
     let vertexShader = this.context.createShader(this.context.VERTEX_SHADER);
@@ -54,7 +57,7 @@ export default class Scene {
     return fragmentShader;
   };
 
-  _bindArrayInsideShader = (arrayToBePushed, shaderAttribute) => {
+  _bindArrayInsideShader = (arrayToBePushed, shaderAttrib, sizeBuffer) => {
     let buffer = this.context.createBuffer();
     this.context.bindBuffer(this.context.ARRAY_BUFFER, buffer);
     this.context.bufferData(
@@ -63,53 +66,56 @@ export default class Scene {
       this.context.STATIC_DRAW
     );
 
-    let coordinate = this.context.getAttribLocation(
+    let attribLocation = this.context.getAttribLocation(
       this.shaderProgram,
-      shaderAttribute
+      shaderAttrib
     );
     this.context.vertexAttribPointer(
-      coordinate,
-      3,
+      attribLocation,
+      sizeBuffer,
       this.context.FLOAT,
       false,
       0,
       0
     );
-    this.context.enableVertexAttribArray(coordinate);
+    this.context.enableVertexAttribArray(attribLocation);
   };
 
-  _bindShaderWithNull = () => {
-    this.context.bindBuffer(this.context.ARRAY_BUFFER, null);
-  };
-
-  add = (geometry) => {
+  addGeometry = (geometry) => {
     this.geometries.push(geometry);
   };
 
-  remove = (removedGeometry) => {
+  removeGeometry = (removedGeometry) => {
     this.geometries.forEach((geometry, index, object) => {
       if (removedGeometry === geometry) object.splice(index, 1);
     });
   };
 
+  setBgColor = (bgColor) => {
+    this._bgColor = bgColor;
+    console.log(bgColor);
+  };
+
   render = () => {
-    this.context.clearColor(1.0, 1.0, 1.0, 1.0);
+    this.context.clearColor(
+      this._bgColor.r,
+      this._bgColor.g,
+      this._bgColor.b,
+      this._bgColor.a
+    );
     this.context.clear(this.context.COLOR_BUFFER_BIT);
 
     this.geometries.forEach((geometry) => {
-      let vertices = [];
+      const verticeArr = new Float32Array(geometry.getVerticeArray());
+      const colorArr = new Float32Array(geometry.getColorArray());
 
-      console.log(geometry.getVerticeArray());
-      vertices.push(...geometry.getVerticeArray());
-
-      vertices = new Float32Array([...vertices]);
-
-      this._bindArrayInsideShader(vertices, "aCoordinates");
+      this._bindArrayInsideShader(verticeArr, "aCoordinates", 3);
+      this._bindArrayInsideShader(colorArr, "aColor", 4);
 
       this.context.drawArrays(
-        this.context.TRIANGLE_FAN,
+        geometry._drawMode,
         0,
-        vertices.length / 3
+        (verticeArr.length + colorArr.length) / 7
       );
     });
   };
