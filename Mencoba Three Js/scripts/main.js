@@ -7,6 +7,14 @@ import {
   createDodecahedron,
 } from "./geometry.js";
 
+import {
+  hemisphereLight,
+  ambientLight,
+  directionalLight,
+  pointLight,
+  spotLight,
+} from "./light.js";
+
 const main = () => {
   let scene, camera, renderer;
   let speedX = 0.05;
@@ -34,7 +42,6 @@ const main = () => {
     scene.background = new THREE.Color(0xefefef);
 
     // 2. create an locate the camera
-    const cameraSize = 5;
     camera = new THREE.PerspectiveCamera(
       30,
       window.innerWidth / window.innerHeight,
@@ -65,7 +72,46 @@ const main = () => {
     scene.add(octahedron);
     scene.add(dodecahedron);
 
-    // 4. create the renderer
+    // 4. initiate light
+    const hemisphere = hemisphereLight("#ffffff", "#141414");
+    hemisphere.position.set(0, 40, 0);
+
+    const ambient = ambientLight("#ffffff");
+
+    const directional = directionalLight("#ffffff");
+    directional.position.set(0, 40, 50);
+
+    const point = pointLight("#ffffff");
+    point.position.set(-60, 40, 50);
+
+    const spot = spotLight("#ffffff", "#141414");
+    spot.position.set(60, 40, 50);
+
+    scene.add(hemisphere);
+    scene.add(ambient);
+    scene.add(directional);
+    scene.add(point);
+    scene.add(spot);
+
+    let lightChoices = [];
+    lightChoices.push(hemisphere, ambient, directional, point, spot);
+
+    lightChoices.forEach((item) => {
+      item.visible = false;
+      scene.add(item);
+    });
+    lightChoices[0].visible = true;
+
+    const selectedLight = document.getElementById("lightChoices");
+    selectedLight.addEventListener("change", () => {
+      const index = Number(selectedLight.value);
+      lightChoices.forEach((item) => {
+        item.visible = false;
+      });
+      lightChoices[index].visible = true;
+    });
+
+    // 5. create the renderer
     renderer = new THREE.WebGLRenderer({ canvas: canvas });
 
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -78,11 +124,12 @@ const main = () => {
 
   // main animation loop - calls 50-60 in a second.
   const mainLoop = function () {
+    const geometriesLength = geometries.length;
     geometries.forEach((geometry, index) => {
       geometry.rotation.x -= (index + 1) * 0.01;
       geometry.rotation.y -= (index + 1) * 0.01;
 
-      geometry.position.x = index * 10;
+      geometry.position.x = index * 10 - (geometriesLength / 2) * 10;
     });
 
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
