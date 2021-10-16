@@ -1,4 +1,6 @@
-let scene, canvas, camera, renderer;
+import { getRandomInt } from "./utils.js";
+
+let scene, canvas, camera, renderer, controls;
 let groups = [],
   geometries = [];
 
@@ -15,40 +17,8 @@ const KEYCODE = {
   KEY_D: 68,
 };
 
-const geometryData = [
-  {
-    name: "benda 1",
-    link: "/icosa.html",
-    color: 0x0ca1cb,
-    side: 2,
-    position: {
-      x: 0,
-      y: 0,
-      z: -5,
-    },
-  },
-  {
-    name: "benda 2",
-    link: "/tetra.html",
-    color: 0xa10ccb,
-    side: 2,
-    position: {
-      x: 20,
-      y: 0,
-      z: 20,
-    },
-  },
-  {
-    name: "benda 3",
-    link: "/lathe.html",
-    color: 0xcba10c,
-    side: 2,
-    position: {
-      x: -20,
-      y: 0,
-      z: 20,
-    },
-  },
+const colorChoices = [
+  0xc06ec7, 0xb8171c, 0x6fa64a, 0xbaba66, 0x7f7dcb, 0xad2749,
 ];
 
 const main = () => {
@@ -96,8 +66,7 @@ const main = () => {
     // calculate objects intersecting the picking ray
     let intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects && intersects[0]) {
-      window.location.assign(intersects[0].object.userData.parent.link);
-      console.log("Nama benda : " + intersects[0].object.userData.parent.name);
+      intersects.forEach((obj) => obj.object.material.color.set(0x00ff00));
     }
   };
 
@@ -105,7 +74,7 @@ const main = () => {
   const createCube = (side, x, y, z, color) => {
     const geometry = new THREE.BoxGeometry(side, side, side);
     const material = new THREE.MeshPhysicalMaterial({ color: color });
-    cube = new THREE.Mesh(geometry, material);
+    const cube = new THREE.Mesh(geometry, material);
     cube.position.set(x, y, z);
 
     return cube;
@@ -124,38 +93,44 @@ const main = () => {
   );
 
   // Add the light
-  const pLight = new THREE.PointLight(LIGHT_COLOR, 1, 100);
-  pLight.position.set(10, 0, 0);
+  const pLight = new THREE.AmbientLight(LIGHT_COLOR, 1);
+  pLight.position.set(20, 20, 30);
   scene.add(pLight);
 
   // 3. Create an locate the object on the scene
   // Loop with geometryData
-  geometryData.forEach((geometry) => {
+  for (let i = 0; i < 10; i++) {
     const obj = createCube(
-      geometry.side,
-      geometry.position.x,
-      geometry.position.y,
-      geometry.position.z,
-      geometry.color
+      getRandomInt(2, 5),
+      getRandomInt(-10, 10),
+      getRandomInt(-10, 10),
+      getRandomInt(0, 10),
+      colorChoices[getRandomInt(0, colorChoices.length)]
     );
     const group = new THREE.Object3D();
 
     obj.userData.parent = group;
     group.add(obj);
 
-    group.name = geometry.name;
-    group.link = geometry.link;
-
     geometries.push(obj);
     groups.push(group);
     scene.add(group);
-  });
+  }
 
-  camera.position.z = 10;
+  camera.position.set(15, 10, 20);
 
   // 4. Create the renderer
   renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Orbit controls
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.listenToKeyEvents(window); // optional
+
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+
+  controls.screenSpacePanning = false;
 
   // Set the Event Listener
   document.addEventListener("keydown", onKeyDown);
@@ -171,6 +146,7 @@ const mainLoop = () => {
     geometry.rotation.y += 0.01;
   });
 
+  controls.update();
   requestAnimationFrame(mainLoop);
 };
 
