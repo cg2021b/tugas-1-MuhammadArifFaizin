@@ -1,6 +1,9 @@
 import { getRandomInt } from "./utils.js";
 
-let scene, canvas, camera, renderer, controls;
+let scene, camera, renderer, controls;
+let canvasDOM, currentScoreDOM, highScoreDOM;
+let currentScore = 0,
+  highScore = 0;
 let selectedObjects = [],
   originalColors = [],
   geometries = [];
@@ -50,7 +53,6 @@ const checkObject = () => {
   const firstObjColor = originalColors[0];
   const secondObjColor = originalColors[1];
 
-  console.log(firstObjColor, secondObjColor);
   if (firstObjColor === secondObjColor) {
     selectedObjects.forEach((obj) => {
       obj.geometry.dispose();
@@ -58,6 +60,8 @@ const checkObject = () => {
       scene.remove(obj);
       renderer.renderLists.dispose();
     });
+    currentScore += 100;
+    currentScoreDOM.innerHTML = currentScore;
   } else {
     selectedObjects[0].material.emissive.setHex(0x000000);
     selectedObjects[1].material.emissive.setHex(0x000000);
@@ -71,7 +75,9 @@ const main = () => {
   let raycaster = new THREE.Raycaster();
   let mouse = new THREE.Vector2();
 
-  canvas = document.getElementById("myCanvas");
+  canvasDOM = document.getElementById("myCanvas");
+  currentScoreDOM = document.getElementById("currentScore");
+  highScoreDOM = document.getElementById("highScore");
 
   // Event Listener Function
   // On Windows Resize
@@ -86,7 +92,6 @@ const main = () => {
   const onKeyDown = (e) => {
     const direction = new THREE.Vector3();
     camera.getWorldDirection(direction);
-    console.log(direction);
 
     // Rotation move
     if (e.keyCode === KEYCODE.KEY_LEFT) camera.rotation.y += 0.03;
@@ -124,7 +129,6 @@ const main = () => {
 
       selectedObjects.push(firstObj);
       originalColors.push(firstObj.material.color.getHex());
-      console.log(selectedObjects);
       if (selectedObjects.length > 1) {
         checkObject();
       }
@@ -157,7 +161,7 @@ const main = () => {
   camera.position.set(15, 10, 20);
 
   // 4. Create the renderer
-  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer = new THREE.WebGLRenderer({ canvas: canvasDOM, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   // Orbit controls
@@ -192,6 +196,14 @@ const mainLoop = () => {
   if (scene.children.length >= 50) {
     treshold = 0;
     speed = baseSpeed;
+
+    if (currentScore > highScore) {
+      highScore = currentScore;
+      highScoreDOM.innerHTML = highScore;
+    }
+
+    currentScore = 0;
+    currentScoreDOM.innerHTML = currentScore;
   } else {
     treshold += speed;
   }
@@ -201,7 +213,6 @@ const mainLoop = () => {
     generateCube();
     treshold = 0;
     speed += 0.002;
-    console.log(`new cube, now speed is ${speed}`);
   }
 
   const elapsedTime = clock.getElapsedTime();
