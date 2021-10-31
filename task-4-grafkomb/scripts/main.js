@@ -1,11 +1,15 @@
 /*
     Orbit Controls [Done]
+    Texture [Done]
+    Controls [Done]
 */
 
 import "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
 import { OrbitControls } from "https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js";
+import { GUI } from "https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js";
 
 import { getRandomInt } from "./utils.js";
+import { DegRadHelper, StringToNumberHelper, wrapModes } from "./helper.js";
 
 let scene, camera, renderer, controls;
 let canvasDOM;
@@ -14,14 +18,16 @@ let geometries = [];
 const BG_COLOR = 0x151515;
 const LIGHT_COLOR = 0xffffff;
 
-const colorChoices = [
-  0xc06ec7, 0xb8171c, 0x6fa64a, 0xbaba66, 0x7f7dcb, 0xad2749,
-];
-
 // Create Geometry Function
-const createCube = (side, x, y, z, color) => {
+const createCube = (side, x, y, z) => {
+  const loader = new THREE.TextureLoader();
   const geometry = new THREE.BoxGeometry(side, side, side);
-  const material = new THREE.MeshPhysicalMaterial({ color: color });
+  const texture = loader.load(
+    "https://threejsfundamentals.org/threejs/resources/images/wall.jpg"
+  );
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+  });
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(x, y, z);
 
@@ -34,8 +40,7 @@ const generateCube = () => {
     getRandomInt(2, 5),
     getRandomInt(-10, 10),
     getRandomInt(-10, 10),
-    getRandomInt(0, 10),
-    colorChoices[getRandomInt(0, colorChoices.length)]
+    getRandomInt(0, 10)
   );
 
   geometries.push(obj);
@@ -91,6 +96,12 @@ const main = () => {
   controls.dampingFactor = 0.05;
 
   controls.screenSpacePanning = false;
+
+  // Controls
+  const gui = new GUI();
+  gui.add(controls, "autoRotate").name("controls.autoRotate").listen();
+  gui.add(controls, "enableDamping").name("controls.enableDamping").listen();
+  gui.add(controls, "dampingFactor", 0, 0.1).name("controls.dampingFactor");
 
   // Set the Event Listener
   window.addEventListener("resize", onWindowResize);
