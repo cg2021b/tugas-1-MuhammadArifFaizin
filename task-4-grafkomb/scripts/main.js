@@ -1,4 +1,9 @@
+/*
+    Orbit Controls [Done]
+*/
+
 import "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+import { OrbitControls } from "https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js";
 
 import { getRandomInt } from "./utils.js";
 
@@ -77,6 +82,16 @@ const main = () => {
   renderer = new THREE.WebGLRenderer({ canvas: canvasDOM, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
+  // Orbit controls
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.listenToKeyEvents(window); // optional
+
+  controls.autoRotate = true;
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+
+  controls.screenSpacePanning = false;
+
   // Set the Event Listener
   window.addEventListener("resize", onWindowResize);
 };
@@ -84,6 +99,7 @@ const main = () => {
 const mainLoop = () => {
   renderer.render(scene, camera);
 
+  controls.update();
   requestAnimationFrame(mainLoop);
 };
 
