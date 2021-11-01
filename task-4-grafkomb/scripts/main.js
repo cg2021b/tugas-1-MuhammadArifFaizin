@@ -4,11 +4,13 @@
     Controls [Done]
     Panorama [Done]
     Realistic Reflective [Done]
+    Load Model [Done]
 */
 
 import "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
 import { OrbitControls } from "https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js";
+import { GLTFLoader } from "https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js";
 
 import { getRandomInt } from "./utils.js";
 
@@ -79,7 +81,7 @@ const main = () => {
   );
 
   // Add the light
-  const pLight = new THREE.AmbientLight(LIGHT_COLOR, 1);
+  const pLight = new THREE.HemisphereLight(LIGHT_COLOR, LIGHT_COLOR, 1);
   pLight.position.set(20, 20, 30);
   scene.add(pLight);
 
@@ -94,6 +96,15 @@ const main = () => {
   for (let i = 0; i < 10; i++) {
     generateCube();
   }
+
+  // Load GLB object
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.load("./models/WaterBottle.gltf", (gltf) => {
+    const waterBottle = gltf.scene;
+    waterBottle.scale.set(80, 80, 80);
+    waterBottle.position.set(0, -20, 0);
+    scene.add(waterBottle);
+  });
 
   camera.position.set(15, 10, 20);
 
@@ -141,7 +152,7 @@ const main = () => {
 
 const mainLoop = () => {
   renderer.render(scene, camera);
-  sphereCamera.updateCubeMap(renderer, scene);
+  sphereCamera.update(renderer, scene);
 
   controls.update();
   requestAnimationFrame(mainLoop);
