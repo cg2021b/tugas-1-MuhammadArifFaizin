@@ -3,6 +3,7 @@
     Texture [Done]
     Controls [Done]
     Panorama [Done]
+    Realistic Reflective [Done]
 */
 
 import "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
@@ -11,7 +12,7 @@ import { GUI } from "https://threejsfundamentals.org/threejs/../3rdparty/dat.gui
 
 import { getRandomInt } from "./utils.js";
 
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, sphereCamera;
 let canvasDOM;
 let geometries = [];
 
@@ -83,7 +84,7 @@ const main = () => {
   scene.add(pLight);
 
   // Add Fog
-  const fogColor = 0xFFFFFF;  // white
+  const fogColor = 0xffffff; // white
   const fogNear = 10;
   const fogFar = 100;
   scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
@@ -95,6 +96,24 @@ const main = () => {
   }
 
   camera.position.set(15, 10, 20);
+
+  // Realistic Reflective
+  const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
+    format: THREE.RGBFormat,
+    generateMipmaps: true,
+    minFilter: THREE.LinearMipmapLinearFilter,
+  });
+
+  sphereCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
+  sphereCamera.position.set(0, 0, -1);
+  scene.add(sphereCamera);
+  let sphereMaterial = new THREE.MeshBasicMaterial({
+    envMap: sphereCamera.renderTarget,
+  });
+  let sphereGeo = new THREE.SphereGeometry(4, 32, 16);
+  let mirrorSphere = new THREE.Mesh(sphereGeo, sphereMaterial);
+  mirrorSphere.position.set(0, 0, -1);
+  scene.add(mirrorSphere);
 
   // 4. Create the renderer
   renderer = new THREE.WebGLRenderer({ canvas: canvasDOM, antialias: true });
@@ -122,6 +141,7 @@ const main = () => {
 
 const mainLoop = () => {
   renderer.render(scene, camera);
+  sphereCamera.updateCubeMap(renderer, scene);
 
   controls.update();
   requestAnimationFrame(mainLoop);
