@@ -2,6 +2,7 @@
     Orbit Controls [Done]
     Texture [Done]
     Controls [Done]
+    Panorama [Done]
 */
 
 import "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
@@ -9,13 +10,11 @@ import { OrbitControls } from "https://threejsfundamentals.org/threejs/resources
 import { GUI } from "https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js";
 
 import { getRandomInt } from "./utils.js";
-import { DegRadHelper, StringToNumberHelper, wrapModes } from "./helper.js";
 
 let scene, camera, renderer, controls;
 let canvasDOM;
 let geometries = [];
 
-const BG_COLOR = 0x151515;
 const LIGHT_COLOR = 0xffffff;
 
 // Create Geometry Function
@@ -60,7 +59,15 @@ const main = () => {
 
   // 1. Create the scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(BG_COLOR);
+  const loader = new THREE.TextureLoader();
+  const texture = loader.load(
+    "https://threejsfundamentals.org/threejs/resources/images/equirectangularmaps/tears_of_steel_bridge_2k.jpg",
+    () => {
+      const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
+      rt.fromEquirectangularTexture(renderer, texture);
+      scene.background = rt.texture;
+    }
+  );
 
   // 2. Create an locate the camera
   camera = new THREE.PerspectiveCamera(
@@ -74,6 +81,12 @@ const main = () => {
   const pLight = new THREE.AmbientLight(LIGHT_COLOR, 1);
   pLight.position.set(20, 20, 30);
   scene.add(pLight);
+
+  // Add Fog
+  const fogColor = 0xFFFFFF;  // white
+  const fogNear = 10;
+  const fogFar = 100;
+  scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
 
   // 3. Create an locate the object on the scene
   // Loop with geometryData
